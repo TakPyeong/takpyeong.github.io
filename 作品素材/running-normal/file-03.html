@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>《完美同事》剧本编辑器</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+            color: white;
+            padding: 25px 30px;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #388E3C;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background-color: #2196F3;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #1976D2;
+            transform: translateY(-2px);
+        }
+        
+        .btn-export {
+            background-color: #FF9800;
+            color: white;
+        }
+        
+        .btn-export:hover {
+            background-color: #F57C00;
+            transform: translateY(-2px);
+        }
+        
+        .info-panel {
+            background-color: #f9f9f9;
+            padding: 20px 30px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .info-item {
+            padding: 10px;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-weight: 400;
+            color: #222;
+        }
+        
+        .scene-container {
+            padding: 20px 30px;
+        }
+        
+        .scene-header {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 5px solid #2196F3;
+        }
+        
+        .scene-title {
+            font-size: 1.4rem;
+            color: #1a237e;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .scene-desc {
+            color: #555;
+            font-style: italic;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 30px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        th {
+            background-color: #1a237e;
+            color: white;
+            padding: 15px 10px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e0e0e0;
+            vertical-align: top;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        tr:hover {
+            background-color: #f1f8ff;
+        }
+        
+        .editable-cell {
+            min-height: 60px;
+        }
+        
+        .editable-cell:focus {
+            outline: 2px solid #2196F3;
+            background-color: #f0f8ff;
+        }
+        
+        .duration-cell {
+            text-align: center;
+            width: 80px;
+        }
+        
+        .footer {
+            background-color: #f5f5f5;
+            padding: 20px 30px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #e0e0e0;
+            font-size: 0.9rem;
+        }
+        
+        .tag {
+            display: inline-block;
+            background-color: #e0e0e0;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-right: 8px;
+            margin-bottom: 5px;
+        }
+        
+        .highlight {
+            background-color: #fff8e1;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .controls {
+                width: 100%;
+                margin-top: 20px;
+            }
+            
+            .btn {
+                flex: 1;
+                justify-content: center;
+            }
+            
+            th, td {
+                padding: 10px 5px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div>
+                    <h1><i class="fas fa-film"></i> 《完美同事》剧本编辑器</h1>
+                    <p class="subtitle">办公室科幻惊悚 / 群体替换恐怖 - 可编辑分镜脚本</p>
+                </div>
+                <div class="controls">
+                    <button class="btn btn-primary" id="saveBtn">
+                        <i class="fas fa-save"></i> 保存修改
+                    </button>
+                    <button class="btn btn-secondary" id="resetBtn">
+                        <i class="fas fa-undo"></i> 重置为原版
+                    </button>
+                    <button class="btn btn-export" id="exportBtn">
+                        <i class="fas fa-file-excel"></i> 导出为Excel
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <div class="info-panel">
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">剧本类型</div>
+                    <div class="info-value">办公室科幻惊悚 / 群体替换恐怖</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">平台</div>
+                    <div class="info-value">抖音 / B站</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">时长</div>
+                    <div class="info-value">1分28秒</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">主角</div>
+                    <div class="info-value">陈默，30岁，数据分析师</div>
+                </div>
+            </div>
+            <div style="margin-top: 15px;">
+                <span class="tag">#办公室恐怖</span>
+                <span class="tag">#外星同事</span>
+                <span class="tag">#群体替换</span>
+                <span class="tag">#你才是异类</span>
+                <span class="tag">#打破第四面墙</span>
+            </div>
+        </div>
+        
+        <div class="scene-container">
+            <!-- 场景1 -->
+            <div class="scene-header">
+                <div class="scene-title"><i class="fas fa-video"></i> 场景1：开放式办公室 · 周一晨会 (0-8秒)</div>
+                <div class="scene-desc">钩子：完美到诡异 - 主角主观视角扫视会议室，发现同事行为完全同步</div>
+            </div>
+            
+            <div class="table-container">
+                <table id="scene1-table">
+                    <thead>
+                        <tr>
+                            <th width="60">镜号</th>
+                            <th width="120">镜头类型</th>
+                            <th width="300">画面描述</th>
+                            <th width="250">对白/音效</th>
+                            <th width="80">时长</th>
+                            <th width="150">备注</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>主观镜头/手持</td>
+                            <td class="editable-cell" contenteditable="true">从陈默视角扫视会议室，略晃动</td>
+                            <td class="editable-cell" contenteditable="true">环境音：空调声、翻页声</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">2秒</td>
+                            <td class="editable-cell" contenteditable="true">营造观察感</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>中景-特写</td>
+                            <td class="editable-cell" contenteditable="true">项目经理讲话，12个同事同步点头</td>
+                            <td class="editable-cell" contenteditable="true">项目经理："本季度增长目标，7.3%"</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">2秒</td>
+                            <td class="editable-cell" contenteditable="true">重点拍整齐点头</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>眼部特写</td>
+                            <td class="editable-cell" contenteditable="true">三个同事眨眼节奏完全一致</td>
+                            <td class="editable-cell" contenteditable="true">眨眼声放大</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">1.5秒</td>
+                            <td class="editable-cell" contenteditable="true">机械感</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>特写</td>
+                            <td class="editable-cell" contenteditable="true">投影仪光线中，同事眼珠反射出奇怪晶状体</td>
+                            <td class="editable-cell" contenteditable="true">轻微的电子音效</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">1秒</td>
+                            <td class="editable-cell" contenteditable="true">一闪而过，不易察觉</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>全景</td>
+                            <td class="editable-cell" contenteditable="true">全体同事齐声回应</td>
+                            <td class="editable-cell" contenteditable="true">全体同事（齐声）："明白"</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">1秒</td>
+                            <td class="editable-cell" contenteditable="true">音量完全一致</td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>特写</td>
+                            <td class="editable-cell" contenteditable="true">陈默的侧脸，冷汗滑落</td>
+                            <td class="editable-cell" contenteditable="true">陈默（内心OS）："……他们刚才呼吸都同步了？"</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">0.5秒</td>
+                            <td class="editable-cell" contenteditable="true">呼吸声同步混音</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 场景2 -->
+            <div class="scene-header">
+                <div class="scene-title"><i class="fas fa-video"></i> 场景2：工位区 · 三天观察蒙太奇 (9-35秒)</div>
+                <div class="scene-desc">怀疑累积 - 快速剪辑，色调逐渐偏冷绿，发现各种异常规律</div>
+            </div>
+            
+            <div class="table-container">
+                <table id="scene2-table">
+                    <thead>
+                        <tr>
+                            <th width="60">镜号</th>
+                            <th width="120">镜头类型</th>
+                            <th width="300">画面描述</th>
+                            <th width="250">对白/音效</th>
+                            <th width="80">时长</th>
+                            <th width="150">备注</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>7</td>
+                            <td>特写</td>
+                            <td class="editable-cell" contenteditable="true">咖啡机数字显示237毫升，接满自动停止</td>
+                            <td class="editable-cell" contenteditable="true">咖啡机"滴"声</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">2秒</td>
+                            <td class="editable-cell" contenteditable="true">色调开始偏冷绿</td>
+                        </tr>
+                        <tr>
+                            <td>8</td>
+                            <td>全景</td>
+                            <td class="editable-cell" contenteditable="true">12:00整，所有人同时放下筷子</td>
+                            <td class="editable-cell" contenteditable="true">筷子整齐放下声</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">2秒</td>
+                            <td class="editable-cell" contenteditable="true">俯拍角度</td>
+                        </tr>
+                        <tr>
+                            <td>9</td>
+                            <td>特写</td>
+                            <td class="editable-cell" contenteditable="true">三个饭盒，剩余饭菜量几乎相同</td>
+                            <td class="editable-cell" contenteditable="true">咀嚼声突然停止</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">2秒</td>
+                            <td class="editable-cell" contenteditable="true">细节对比</td>
+                        </tr>
+                        <tr>
+                            <td>10</td>
+                            <td>中景</td>
+                            <td class="editable-cell" contenteditable="true">两个同事聊天，陈默数着单词数（质数显示）</td>
+                            <td class="editable-cell" contenteditable="true">对话模糊处理</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">3秒</td>
+                            <td class="editable-cell" contenteditable="true">数字特效显示"17个单词"</td>
+                        </tr>
+                        <tr>
+                            <td>11</td>
+                            <td>特写</td>
+                            <td class="editable-cell" contenteditable="true">同事手指反向弯曲30度整理文件</td>
+                            <td class="editable-cell" contenteditable="true">骨节轻微响声</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">2秒</td>
+                            <td class="editable-cell" contenteditable="true">同事自己没察觉</td>
+                        </tr>
+                        <tr>
+                            <td>12</td>
+                            <td>监控画面</td>
+                            <td class="editable-cell" contenteditable="true">凌晨3:33，茶水间同事头部发出光脉冲</td>
+                            <td class="editable-cell" contenteditable="true">静音，只有时间戳跳动</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">3秒</td>
+                            <td class="editable-cell" contenteditable="true">黑白监控画面</td>
+                        </tr>
+                        <tr>
+                            <td>13</td>
+                            <td>特写</td>
+                            <td class="editable-cell" contenteditable="true">陈默在工位发语音，眼神警惕</td>
+                            <td class="editable-cell" contenteditable="true">陈默（低声）："老吴，我们公司的人……不太对劲"</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">3秒</td>
+                            <td class="editable-cell" contenteditable="true">压低声音</td>
+                        </tr>
+                        <tr>
+                            <td>14</td>
+                            <td>手机屏幕</td>
+                            <td class="editable-cell" contenteditable="true">好友回复消息弹出</td>
+                            <td class="editable-cell" contenteditable="true">好友（画外音）："财报周压力大吧？你别又疑神疑鬼"</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">2秒</td>
+                            <td class="editable-cell" contenteditable="true">显示为语音消息</td>
+                        </tr>
+                        <tr>
+                            <td>15</td>
+                            <td>特写</td>
+                            <td class="editable-cell" contenteditable="true">陈默放下手机，表情挣扎</td>
+                            <td class="editable-cell" contenteditable="true">快速剪辑，紧张音乐起</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">3秒</td>
+                            <td class="editable-cell" contenteditable="true">内心挣扎蒙太奇</td>
+                        </tr>
+                        <tr>
+                            <td>16</td>
+                            <td>特写</td>
+                            <td class="editable-cell" contenteditable="true">陈默深夜查看监控，眼神逐渐坚定</td>
+                            <td class="editable-cell" contenteditable="true">鼠标点击声</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">3秒</td>
+                            <td class="editable-cell" contenteditable="true">决定取证</td>
+                        </tr>
+                        <tr>
+                            <td>17</td>
+                            <td>细节</td>
+                            <td class="editable-cell" contenteditable="true">陈默将手机设置为飞行模式，但开启录像</td>
+                            <td class="editable-cell" contenteditable="true">手机静音提示音</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">2秒</td>
+                            <td class="editable-cell" contenteditable="true">为后续失误埋下伏笔</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 场景3 -->
+            <div class="scene-header">
+                <div class="scene-title"><i class="fas fa-video"></i> 场景3：茶水间仪式 (36-58秒)</div>
+                <div class="scene-desc">高潮：目睹仪式 - 手机偷拍视角，躲在绿植后，发现同事非人本质</div>
+            </div>
+            
+            <div class="table-container">
+                <table id="scene3-table">
+                    <thead>
+                        <tr>
+                            <th width="60">镜号</th>
+                            <th width="120">镜头类型</th>
+                            <th width="300">画面描述</th>
+                            <th width="250">对白/音效</th>
+                            <th width="80">时长</th>
+                            <th width="150">备注</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>18</td>
+                            <td>手机视角</td>
+                            <td class="editable-cell" contenteditable="true">透过绿植缝隙偷拍，轻微晃动</td>
+                            <td class="editable-cell" contenteditable="true">环境音：轻微电流声</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">3秒</td>
+                            <td class="editable-cell" contenteditable="true">营造偷拍感</td>
+                        </tr>
+                        <tr>
+                            <td>19</td>
+                            <td>中景</td>
+                            <td class="editable-cell" contenteditable="true">3:33整，6名同事静默走入，围成六边形</td>
+                            <td class="editable-cell" contenteditable="true">精准的脚步声</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">4秒</td>
+                            <td class="editable-cell" contenteditable="true">步伐完全一致</td>
+                        </tr>
+                        <tr>
+                            <td>20</td>
+                            <td>特写</td>
+                            <td class="editable-cell" contenteditable="true">六人同时抬起右手，掌心向上</td>
+                            <td class="editable-cell" contenteditable="true">同步的衣料摩擦声</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">3秒</td>
+                            <td class="editable-cell" contenteditable="true">慢动作</td>
+                        </tr>
+                        <tr>
+                            <td>21</td>
+                            <td>特写</td>
+                            <td class="editable-cell" contenteditable="true">掌心裂开，露出蓝色发光接口（无血）</td>
+                            <td class="editable-cell" contenteditable="true">轻微的撕裂声+电子启动音</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">3秒</td>
+                            <td class="editable-cell" contenteditable="true">重点特效镜头</td>
+                        </tr>
+                        <tr>
+                            <td>22</td>
+                            <td>全景</td>
+                            <td class="editable-cell" contenteditable="true">接口射出细光束，构建三维财报图表</td>
+                            <td class="editable-cell" contenteditable="true">高频电子嗡鸣</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">4秒</td>
+                            <td class="editable-cell" contenteditable="true">数据流使用非地球符号</td>
+                        </tr>
+                        <tr>
+                            <td>23</td>
+                            <td>特写</td>
+                            <td class="editable-cell" contenteditable="true">陈默震惊的脸，手机微微颤抖</td>
+                            <td class="editable-cell" contenteditable="true">呼吸声加重</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">2秒</td>
+                            <td class="editable-cell" contenteditable="true">透过手机屏幕反射</td>
+                        </tr>
+                        <tr>
+                            <td>24</td>
+                            <td>特写</td>
+                            <td class="editable-cell" contenteditable="true">手机突然震动（忘记静音）</td>
+                            <td class="editable-cell" contenteditable="true">"嗡嗡"震动声</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">1秒</td>
+                            <td class="editable-cell" contenteditable="true">声音被放大</td>
+                        </tr>
+                        <tr>
+                            <td>25</td>
+                            <td>快切</td>
+                            <td class="editable-cell" contenteditable="true">六人瞬间转头，动作完全同步</td>
+                            <td class="editable-cell" contenteditable="true">集体转头的风声</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">2秒</td>
+                            <td class="editable-cell" contenteditable="true">压迫感</td>
+                        </tr>
+                        <tr>
+                            <td>26</td>
+                            <td>特写</td>
+                            <td class="editable-cell" contenteditable="true">手机屏幕中，六个放大的瞳孔</td>
+                            <td class="editable-cell" contenteditable="true">嗡鸣声突然停止，死寂</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">1秒</td>
+                            <td class="editable-cell" contenteditable="true">压迫感</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 场景4 -->
+            <div class="scene-header">
+                <div class="scene-title"><i class="fas fa-video"></i> 场景4：对峙与摊牌 (59-75秒)</div>
+                <div class="scene-desc">对峙与摊牌 - 快速切换特写，陈默被发现，项目经理摊牌</div>
+            </div>
+            
+            <div class="table-container">
+                <table id="scene4-table">
+                    <thead>
+                        <tr>
+                            <th width="60">镜号</th>
+                            <th width="120">镜头类型</th>
+                            <th width="300">画面描述</th>
+                            <th width="250">对白/音效</th>
+                            <th width="80">时长</th>
+                            <th width="150">备注</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>27</td>
+                            <td>手持跟拍</td>
+                            <td class="editable-cell" contenteditable="true">陈默冲出藏身处，背贴墙壁</td>
+                            <td class="editable-cell" contenteditable="true">急促呼吸声、脚步声</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">3秒</td>
+                            <td class="editable-cell" contenteditable="true">晃动剧烈</td>
+                        </tr>
+                        <tr>
+                            <td>28</td>
+                            <td>慢动作</td>
+                            <td class="editable-cell" contenteditable="true">6人缓步逼近，表情平静诡异</td>
+                            <td class="editable-cell" contenteditable="true">缓慢的脚步声</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">3秒</td>
+                            <td class="editable-cell" contenteditable="true">平静与恐慌对比</td>
+                        </tr>
+                        <tr>
+                            <td>29</td>
+                            <td>特写切换</td>
+                            <td class="editable-cell" contenteditable="true">陈默颤抖的嘴唇 vs 项目经理微笑的嘴角</td>
+                            <td class="editable-cell" contenteditable="true">陈默（颤抖）："你们……是什么？"</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">2秒</td>
+                            <td class="editable-cell" contenteditable="true">正反打</td>
+                        </tr>
+                        <tr>
+                            <td>30</td>
+                            <td>中景</td>
+                            <td class="editable-cell" contenteditable="true">项目经理平静回答，其他人如雕像</td>
+                            <td class="editable-cell" contenteditable="true">项目经理（平稳）："我们是'优化后的人力资源3.7版'"</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">3秒</td>
+                            <td class="editable-cell" contenteditable="true">语调无起伏</td>
+                        </tr>
+                        <tr>
+                            <td>31</td>
+                            <td>特写</td>
+                            <td class="editable-cell" contenteditable="true">陈默转头，发现整个部门已包围他</td>
+                            <td class="editable-cell" contenteditable="true">项目经理（继续）："建议接受升级"</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">2秒</td>
+                            <td class="editable-cell" contenteditable="true">360度环绕镜头</td>
+                        </tr>
+                        <tr>
+                            <td>32</td>
+                            <td>全景</td>
+                            <td class="editable-cell" contenteditable="true">人群缓缓合围，陈默如困兽</td>
+                            <td class="editable-cell" contenteditable="true">人群同步迈步声</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">2秒</td>
+                            <td class="editable-cell" contenteditable="true">压迫感增强</td>
+                        </tr>
+                        <tr>
+                            <td>33</td>
+                            <td>特写</td>
+                            <td class="editable-cell" contenteditable="true">两只手抓住陈默的手臂（力度一致）</td>
+                            <td class="editable-cell" contenteditable="true">衣物摩擦声</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">2秒</td>
+                            <td class="editable-cell" contenteditable="true">触感冰冷</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 场景5-7 -->
+            <div class="scene-header">
+                <div class="scene-title"><i class="fas fa-video"></i> 场景5-7：结局与反转 (76-120秒)</div>
+                <div class="scene-desc">反转：你才是异常 - 残酷选项，细思极恐结局，打破第四面墙</div>
+            </div>
+            
+            <div class="table-container">
+                <table id="scene5-table">
+                    <thead>
+                        <tr>
+                            <th width="60">镜号</th>
+                            <th width="120">镜头类型</th>
+                            <th width="300">画面描述</th>
+                            <th width="250">对白/音效</th>
+                            <th width="80">时长</th>
+                            <th width="150">备注</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>34</td>
+                            <td>鱼眼镜头</td>
+                            <td class="editable-cell" contenteditable="true">陈默被"请"入会议室，空间扭曲</td>
+                            <td class="editable-cell" contenteditable="true">椅子拖动声</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">2秒</td>
+                            <td class="editable-cell" contenteditable="true">失真感</td>
+                        </tr>
+                        <tr>
+                            <td>35</td>
+                            <td>屏幕特写</td>
+                            <td class="editable-cell" contenteditable="true">投影显示公司架构图，371个绿点1个红点</td>
+                            <td class="editable-cell" contenteditable="true">投影仪风扇声</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">3秒</td>
+                            <td class="editable-cell" contenteditable="true">红点闪烁（陈默）</td>
+                        </tr>
+                        <tr>
+                            <td>36</td>
+                            <td>特写</td>
+                            <td class="editable-cell" contenteditable="true">HR总监走进，微笑弧度精确</td>
+                            <td class="editable-cell" contenteditable="true">高跟鞋声（节奏精准）</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">2秒</td>
+                            <td class="editable-cell" contenteditable="true">HR总监（温柔非人）："陈默，别害怕"</td>
+                        </tr>
+                        <tr>
+                            <td>37</td>
+                            <td>中景</td>
+                            <td class="editable-cell" contenteditable="true">HR总监边走边说，其他同事静立</td>
+                            <td class="editable-cell" contenteditable="true">HR总监："我们三年前接管了这家公司"</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">3秒</td>
+                            <td class="editable-cell" contenteditable="true">语调温柔但无情感</td>
+                        </tr>
+                        <tr>
+                            <td>38</td>
+                            <td>特写</td>
+                            <td class="editable-cell" contenteditable="true">陈默惊恐的表情</td>
+                            <td class="editable-cell" contenteditable="true">HR总监（继续）："你是最后一个原生人类员工"</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">2秒</td>
+                            <td class="editable-cell" contenteditable="true">瞳孔放大</td>
+                        </tr>
+                        <tr>
+                            <td>39</td>
+                            <td>特写</td>
+                            <td class="editable-cell" contenteditable="true">HR总监嘴角的精确微笑</td>
+                            <td class="editable-cell" contenteditable="true">HR总监："但你发现了。所以现在，你有两个选择"</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">3秒</td>
+                            <td class="editable-cell" contenteditable="true">微笑持续不变</td>
+                        </tr>
+                        <tr>
+                            <td>40</td>
+                            <td>屏幕占据</td>
+                            <td class="editable-cell" contenteditable="true">投影显示两个选项</td>
+                            <td class="editable-cell" contenteditable="true">选项弹出音效</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">2秒</td>
+                            <td class="editable-cell" contenteditable="true">占据整个画面</td>
+                        </tr>
+                        <tr>
+                            <td>41</td>
+                            <td>闪回A</td>
+                            <td class="editable-cell" contenteditable="true">陈默"新版本"眼神空洞，完美协作</td>
+                            <td class="editable-cell" contenteditable="true">HR总监（画外音）："选择A，你将成为集体的一部分"</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">3秒</td>
+                            <td class="editable-cell" contenteditable="true">色调变冷蓝，机械高效</td>
+                        </tr>
+                        <tr>
+                            <td>42</td>
+                            <td>闪回B</td>
+                            <td class="editable-cell" contenteditable="true">透明观察舱，外星科学家记录数据</td>
+                            <td class="editable-cell" contenteditable="true">HR总监（继续）："选择B，你将作为'原生人类样本'"</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">3秒</td>
+                            <td class="editable-cell" contenteditable="true">色调暖黄但虚假</td>
+                        </tr>
+                        <tr>
+                            <td>43</td>
+                            <td>特写</td>
+                            <td class="editable-cell" contenteditable="true">每个同事脸上相同的"善意"表情</td>
+                            <td class="editable-cell" contenteditable="true">HR总监："我们都是为你好"</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">2秒</td>
+                            <td class="editable-cell" contenteditable="true">表情完全一致</td>
+                        </tr>
+                        <tr>
+                            <td>44</td>
+                            <td>特写</td>
+                            <td class="editable-cell" contenteditable="true">陈默环顾四周，绝望的眼神</td>
+                            <td class="editable-cell" contenteditable="true">心跳声</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">2秒</td>
+                            <td class="editable-cell" contenteditable="true">缓慢环绕镜头</td>
+                        </tr>
+                        <tr>
+                            <td>45</td>
+                            <td>特写</td>
+                            <td class="editable-cell" contenteditable="true">陈默低下头，准备选择</td>
+                            <td class="editable-cell" contenteditable="true">陈默（声音嘶哑）："我选……"</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">3秒</td>
+                            <td class="editable-cell" contenteditable="true">声音颤抖</td>
+                        </tr>
+                        <tr>
+                            <td>46</td>
+                            <td>特写</td>
+                            <td class="editable-cell" contenteditable="true">整个楼层同事同时微笑点头</td>
+                            <td class="editable-cell" contenteditable="true">集体点头的轻微风声</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">2秒</td>
+                            <td class="editable-cell" contenteditable="true">仿佛已知答案</td>
+                        </tr>
+                        <tr>
+                            <td>47</td>
+                            <td>拉远</td>
+                            <td class="editable-cell" contenteditable="true">穿透屋顶，写字楼包裹在透明能量网格中</td>
+                            <td class="editable-cell" contenteditable="true">能量场"嗡"声</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">2秒</td>
+                            <td class="editable-cell" contenteditable="true">视觉特效</td>
+                        </tr>
+                        <tr>
+                            <td>48</td>
+                            <td>快速拉远</td>
+                            <td class="editable-cell" contenteditable="true">城市上空，上百栋楼亮着同样网格</td>
+                            <td class="editable-cell" contenteditable="true">拉远音效</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">2秒</td>
+                            <td class="editable-cell" contenteditable="true">鸟瞰视角</td>
+                        </tr>
+                        <tr>
+                            <td>49</td>
+                            <td>太空视角</td>
+                            <td class="editable-cell" contenteditable="true">地球轨道上的环状空间站投射光束</td>
+                            <td class="editable-cell" contenteditable="true">太空环境音</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">2秒</td>
+                            <td class="editable-cell" contenteditable="true">宏大场景</td>
+                        </tr>
+                        <tr>
+                            <td>50</td>
+                            <td>Glitch特效</td>
+                            <td class="editable-cell" contenteditable="true">画面突然出现信号干扰、抖动</td>
+                            <td class="editable-cell" contenteditable="true">信号干扰声</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">1秒</td>
+                            <td class="editable-cell" contenteditable="true">打破沉浸感</td>
+                        </tr>
+                        <tr>
+                            <td>51</td>
+                            <td>黑底白字</td>
+                            <td class="editable-cell" contenteditable="true">【数据更新】 仍存活未替换用户：1人</td>
+                            <td class="editable-cell" contenteditable="true">系统提示音</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">2秒</td>
+                            <td class="editable-cell" contenteditable="true">逐行出现</td>
+                        </tr>
+                        <tr>
+                            <td>52</td>
+                            <td>黑底白字</td>
+                            <td class="editable-cell" contenteditable="true">定位：正在观看本视频 即将执行远程升级……</td>
+                            <td class="editable-cell" contenteditable="true">定位"滴"声</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">2秒</td>
+                            <td class="editable-cell" contenteditable="true">指向观众</td>
+                        </tr>
+                        <tr>
+                            <td>53</td>
+                            <td>全黑</td>
+                            <td class="editable-cell" contenteditable="true">黑屏，只剩声音</td>
+                            <td class="editable-cell" contenteditable="true">尖锐系统提示音"滴——"→持续电子嗡鸣</td>
+                            <td class="duration-cell editable-cell" contenteditable="true">2秒</td>
+                            <td class="editable-cell" contenteditable="true">声音持续数秒</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>《完美同事》剧本编辑器 v1.0 | 办公室科幻惊悚/群体替换恐怖 | 总计53个镜头，总时长1分28秒</p>
+            <p>提示：点击表格中的任何单元格可直接编辑内容。使用上方按钮保存、重置或导出为Excel文件。</p>
+            <p style="margin-top: 10px; font-size: 0.8rem; color: #999;">注：本编辑器使用HTML5 contentEditable功能，修改后需点击"保存修改"才能持久化。</p>
+        </div>
+    </div>
+
+    <script>
+        // 保存原始数据用于重置功能
+        const originalData = {};
+        
+        // 初始化保存原始数据
+        document.addEventListener('DOMContentLoaded', function() {
+            const tables = document.querySelectorAll('table');
+            tables.forEach(table => {
+                const tableId = table.id;
+                originalData[tableId] = [];
+                
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    const rowData = [];
+                    cells.forEach(cell => {
+                        rowData.push(cell.textContent);
+                    });
+                    originalData[tableId].push(rowData);
+                });
+            });
+            
+            // 加载保存的数据（如果有）
+            loadSavedData();
+        });
+        
+        // 保存修改按钮
+        document.getElementById('saveBtn').addEventListener('click', function() {
+            saveData();
+            alert('修改已保存到浏览器本地存储！');
+        });
+        
+        // 重置为原版按钮
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            if (confirm('确定要重置所有修改，恢复为原始剧本吗？')) {
+                resetToOriginal();
+                alert('已重置为原始剧本！');
+            }
+        });
+        
+        // 导出为Excel按钮
+        document.getElementById('exportBtn').addEventListener('click', function() {
+            exportToExcel();
+        });
+        
+        // 保存数据到本地存储
+        function saveData() {
+            const allData = {};
+            const tables = document.querySelectorAll('table');
+            
+            tables.forEach(table => {
+                const tableId = table.id;
+                const tableData = [];
+                
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    const rowData = {
+                        镜号: row.querySelector('td:nth-child(1)').textContent,
+                        镜头类型: row.querySelector('td:nth-child(2)').textContent,
+                        画面描述: row.querySelector('td:nth-child(3)').textContent,
+                        对白音效: row.querySelector('td:nth-child(4)').textContent,
+                        时长: row.querySelector('td:nth-child(5)').textContent,
+                        备注: row.querySelector('td:nth-child(6)').textContent
+                    };
+                    tableData.push(rowData);
+                });
+                
+                allData[tableId] = tableData;
+            });
+            
+            // 保存到localStorage
+            localStorage.setItem('perfectColleagueScript', JSON.stringify(allData));
+        }
+        
+        // 从本地存储加载数据
+        function loadSavedData() {
+            const savedData = localStorage.getItem('perfectColleagueScript');
+            if (savedData) {
+                try {
+                    const allData = JSON.parse(savedData);
+                    
+                    for (const tableId in allData) {
+                        const table = document.getElementById(tableId);
+                        if (table) {
+                            const rows = table.querySelectorAll('tbody tr');
+                            const tableData = allData[tableId];
+                            
+                            rows.forEach((row, rowIndex) => {
+                                if (tableData[rowIndex]) {
+                                    const cells = row.querySelectorAll('td');
+                                    cells[0].textContent = tableData[rowIndex].镜号 || '';
+                                    cells[1].textContent = tableData[rowIndex].镜头类型 || '';
+                                    cells[2].textContent = tableData[rowIndex].画面描述 || '';
+                                    cells[3].textContent = tableData[rowIndex].对白音效 || '';
+                                    cells[4].textContent = tableData[rowIndex].时长 || '';
+                                    cells[5].textContent = tableData[rowIndex].备注 || '';
+                                }
+                            });
+                        }
+                    }
+                } catch (e) {
+                    console.error('加载保存数据失败:', e);
+                }
+            }
+        }
+        
+        // 重置为原始数据
+        function resetToOriginal() {
+            for (const tableId in originalData) {
+                const table = document.getElementById(tableId);
+                if (table) {
+                    const rows = table.querySelectorAll('tbody tr');
+                    const tableData = originalData[tableId];
+                    
+                    rows.forEach((row, rowIndex) => {
+                        if (tableData[rowIndex]) {
+                            const cells = row.querySelectorAll('td');
+                            cells.forEach((cell, cellIndex) => {
+                                cell.textContent = tableData[rowIndex][cellIndex] || '';
+                            });
+                        }
+                    });
+                }
+            }
+            
+            // 清除保存的数据
+            localStorage.removeItem('perfectColleagueScript');
+        }
+        
+        // 导出为Excel文件
+        function exportToExcel() {
+            // 创建包含所有表格数据的工作簿
+            const wb = XLSX.utils.book_new();
+            
+            // 获取所有表格
+            const sceneTables = [
+                {id: 'scene1-table', name: '场景1_晨会'},
+                {id: 'scene2-table', name: '场景2_观察'},
+                {id: 'scene3-table', name: '场景3_仪式'},
+                {id: 'scene4-table', name: '场景4_对峙'},
+                {id: 'scene5-table', name: '场景5-7_结局'}
+            ];
+            
+            // 为每个场景创建工作表
+            sceneTables.forEach(scene => {
+                const table = document.getElementById(scene.id);
+                if (table) {
+                    // 获取表头
+                    const headers = [];
+                    const ths = table.querySelectorAll('thead th');
+                    ths.forEach(th => {
+                        headers.push(th.textContent);
+                    });
+                    
+                    // 获取数据行
+                    const dataRows = [];
+                    const rows = table.querySelectorAll('tbody tr');
+                    rows.forEach(row => {
+                        const rowData = [];
+                        const cells = row.querySelectorAll('td');
+                        cells.forEach(cell => {
+                            rowData.push(cell.textContent);
+                        });
+                        dataRows.push(rowData);
+                    });
+                    
+                    // 创建工作表数据
+                    const wsData = [headers, ...dataRows];
+                    const ws = XLSX.utils.aoa_to_sheet(wsData);
+                    
+                    // 设置列宽
+                    const colWidths = [
+                        {wch: 8},   // 镜号
+                        {wch: 15},  // 镜头类型
+                        {wch: 40},  // 画面描述
+                        {wch: 35},  // 对白/音效
+                        {wch: 10},  // 时长
+                        {wch: 25}   // 备注
+                    ];
+                    ws['!cols'] = colWidths;
+                    
+                    // 添加到工作簿
+                    XLSX.utils.book_append_sheet(wb, ws, scene.name);
+                }
+            });
+            
+            // 添加元数据工作表
+            const metadata = [
+                ['《完美同事》剧本导出数据'],
+                ['导出时间', new Date().toLocaleString('zh-CN')],
+                ['剧本类型', '办公室科幻惊悚 / 群体替换恐怖'],
+                ['平台', '抖音 / B站'],
+                ['时长', '1分28秒'],
+                ['主角', '陈默，30岁，数据分析师'],
+                ['总镜头数', '53个'],
+                ['场景数', '7个'],
+                [''],
+                ['标签', '#办公室恐怖 #外星同事 #群体替换 #你才是异类 #打破第四面墙']
+            ];
+            
+            const wsMeta = XLSX.utils.aoa_to_sheet(metadata);
+            wsMeta['!cols'] = [{wch: 15}, {wch: 40}];
+            XLSX.utils.book_append_sheet(wb, wsMeta, '元数据');
+            
+            // 生成文件名
+            const fileName = `完美同事_剧本分镜_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            
+            // 导出Excel文件
+            XLSX.writeFile(wb, fileName);
+        }
+    </script>
+</body>
+</html>

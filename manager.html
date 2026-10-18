@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Portfolio Manager — 于卓平</title>
+  <style>
+    :root{
+      --bg:#f4f4f0;--panel:#fff;--ink:#181816;--muted:#74746d;--line:#dcdcd5;
+      --soft:#ecece7;--accent:#c9ff4a;--danger:#b63c32;--radius:3px;
+      --sans:Arial,"Noto Sans SC","Microsoft YaHei",sans-serif;--mono:Consolas,"SFMono-Regular",monospace
+    }
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans)}
+    button,input,textarea,select{font:inherit;color:inherit} button{cursor:pointer}
+    .app{min-height:100vh;display:grid;grid-template-columns:280px minmax(0,1fr)}
+    .sidebar{position:sticky;top:0;height:100vh;padding:24px 18px;border-right:1px solid var(--line);background:#eeeeea;overflow:auto}
+    .brand{margin-bottom:28px}.brand small,.eyebrow{font:10px var(--mono);letter-spacing:.08em;color:var(--muted)}
+    .brand h1{margin:7px 0 0;font-size:17px;letter-spacing:-.03em}.folder-status{margin:18px 0;padding:12px;border:1px solid var(--line);background:rgba(255,255,255,.55)}
+    .folder-status strong{display:block;font-size:11px;margin-bottom:5px}.folder-status span{display:block;font:9px var(--mono);color:var(--muted);word-break:break-all;line-height:1.5}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:38px;padding:0 13px;border:1px solid var(--ink);border-radius:var(--radius);background:var(--ink);color:white;font-size:11px}
+    .btn--light{background:transparent;color:var(--ink);border-color:var(--line)}.btn--accent{background:var(--accent);color:var(--ink);border-color:var(--accent)}
+    .btn--danger{background:transparent;color:var(--danger);border-color:#d7aaa6}.btn:disabled{opacity:.35;cursor:not-allowed}
+    .sidebar-actions{display:grid;gap:7px;margin-bottom:22px}.project-list{display:grid;gap:5px}
+    .project-item{display:grid;grid-template-columns:1fr auto;gap:5px;align-items:center}
+    .project-select{width:100%;padding:10px;border:1px solid transparent;background:transparent;text-align:left;border-radius:var(--radius);font-size:11px}
+    .project-select span{display:block;color:var(--muted);font:9px var(--mono);margin-top:4px}.project-select:hover,.project-select.active{background:white;border-color:var(--line)}
+    .move-buttons{display:flex;flex-direction:column}.move-buttons button{width:24px;height:20px;border:0;background:transparent;color:var(--muted);font-size:10px}
+    .main{min-width:0;padding:28px clamp(22px,4vw,60px) 80px}.toolbar{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:30px}
+    .toolbar h2{margin:5px 0 0;font-size:clamp(26px,4vw,48px);letter-spacing:-.06em}.toolbar-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+    .notice{margin:0 0 22px;padding:13px 15px;border:1px solid #d7d7cf;background:#fffffb;font-size:11px;line-height:1.7}.notice.success{border-color:#aac57a;background:#f5f9ec}.notice.error{border-color:#d6aaa6;background:#fff5f4;color:#8e2c24}
+    .card{margin-bottom:18px;padding:20px;border:1px solid var(--line);background:var(--panel)}.card-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
+    .card h3{margin:0;font-size:15px}.card-head small{color:var(--muted);font:9px var(--mono)}
+    .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.field{display:grid;gap:6px}.field.full{grid-column:1/-1}
+    label{font-size:10px;color:#55554f}input,textarea,select{width:100%;border:1px solid var(--line);border-radius:var(--radius);background:#fbfbf8;padding:10px 11px;font-size:11px;outline:none}
+    textarea{min-height:92px;resize:vertical;line-height:1.65}input:focus,textarea:focus,select:focus{border-color:#777}
+    .check{display:flex;align-items:center;gap:8px}.check input{width:auto}.asset-row{display:grid;grid-template-columns:88px 1fr auto;gap:12px;align-items:center;padding:11px 0;border-top:1px solid var(--soft)}
+    .asset-row:first-child{border-top:0}.asset-type{font:9px var(--mono);color:var(--muted)}.asset-info strong{display:block;font-size:11px;font-weight:600}.asset-info span{display:block;margin-top:4px;color:var(--muted);font:9px var(--mono);word-break:break-all}
+    .section-box{margin-top:12px;padding:15px;border:1px solid var(--line);background:#fafaf7}.section-top{display:grid;grid-template-columns:130px 1fr auto;gap:9px;align-items:center;margin-bottom:12px}
+    .gallery-files{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}.gallery-chip{min-width:0;padding:9px;border:1px solid var(--line);background:white}
+    .gallery-chip strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px}.gallery-chip span{display:block;margin-top:5px;color:var(--muted);font:8px var(--mono)}
+    .drop{position:relative;display:flex;align-items:center;justify-content:center;min-height:84px;margin-top:10px;border:1px dashed #bcbcb3;background:#f1f1ec;color:#666;font-size:10px;text-align:center}
+    .drop input{position:absolute;inset:0;opacity:0;cursor:pointer}.drop.drag{border-color:var(--ink);background:#e9f4cf}.mini{padding:6px 8px;border:1px solid var(--line);background:transparent;font-size:9px;border-radius:2px}
+    .danger-zone{border-color:#e2c5c2}.empty{padding:55px 20px;text-align:center;color:var(--muted);font-size:12px}.help{max-width:800px;color:#5d5d56;font-size:11px;line-height:1.8}
+    .help code{padding:2px 5px;background:#e9e9e3;font:10px var(--mono)}.hidden{display:none!important}
+    @media(max-width:820px){.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto;border-right:0;border-bottom:1px solid var(--line)}.project-list{grid-template-columns:repeat(2,minmax(0,1fr))}.main{padding:24px 18px 60px}.toolbar{flex-direction:column}.toolbar-actions{justify-content:flex-start}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.section-top{grid-template-columns:1fr}.asset-row{grid-template-columns:70px 1fr}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><small>LOCAL CONTENT TOOL</small><h1>于卓平 Portfolio Manager</h1></div>
+    <div class="folder-status"><strong id="folderLabel">尚未连接作品集</strong><span id="folderPath">第一次使用请点下面按钮</span></div>
+    <div class="sidebar-actions">
+      <button class="btn btn--accent" id="openFolder">选择作品集文件夹</button>
+      <button class="btn btn--light" id="reloadBtn" disabled>重新读取 content.js</button>
+      <button class="btn btn--light" id="newProjectBtn" disabled>＋ 新建项目</button>
+    </div>
+    <p class="eyebrow">PROJECTS</p>
+    <div class="project-list" id="projectList"></div>
+  </aside>
+
+  <main class="main">
+    <div class="toolbar">
+      <div><span class="eyebrow">PORTFOLIO CONTENT</span><h2 id="pageTitle">先连接你的网站文件夹</h2></div>
+      <div class="toolbar-actions">
+        <button class="btn btn--light" id="previewBtn" disabled>预览网站 ↗</button>
+        <button class="btn" id="saveBtn" disabled>保存到 content.js</button>
+      </div>
+    </div>
+    <div id="notice" class="notice">这个工具只在你的电脑本地工作。它不会上传 GitHub，也不会把文件发送到任何服务器。</div>
+    <div id="editor"><div class="empty">选择作品集文件夹后，这里会出现项目编辑器。</div></div>
+  </main>
+</div>
+
+<script>
+(function(){
+"use strict";
+var rootHandle=null, data=null, currentIndex=0, dirty=false;
+var $=function(s){return document.querySelector(s)};
+var notice=$("#notice"), editor=$("#editor"), projectList=$("#projectList");
+function msg(t,type){notice.textContent=t;notice.className="notice"+(type?" "+type:"")}
+function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function clone(v){return JSON.parse(JSON.stringify(v))}
+function slug(s){return String(s||"project").trim().toLowerCase().replace(/\s+/g,"-").replace(/[^a-z0-9\u4e00-\u9fa5-]/g,"").replace(/-+/g,"-")||"project"}
+async function getFile(path,create){
+  var parts=path.split("/").filter(Boolean), dir=rootHandle;
+  for(var i=0;i<parts.length-1;i++) dir=await dir.getDirectoryHandle(parts[i],{create:!!create});
+  return await dir.getFileHandle(parts[parts.length-1],{create:!!create})
+}
+async function readText(path){var h=await getFile(path,false),f=await h.getFile();return await f.text()}
+async function writeText(path,text){var h=await getFile(path,true),w=await h.createWritable();await w.write(text);await w.close()}
+function parseContent(text){
+  var marker="window.PORTFOLIO";
+  var p=text.indexOf(marker); if(p<0)throw new Error("找不到 window.PORTFOLIO");
+  var eq=text.indexOf("=",p); var end=text.lastIndexOf(";");
+  var raw=text.slice(eq+1,end>eq?end:text.length).trim();
+  return Function('"use strict";return ('+raw+')')();
+}
+function jsString(v){return JSON.stringify(v, null, 2)}
+function serialize(){
+  return "/*\n * 由 manager.html 自动生成。你仍然可以手动编辑，但再次从 Manager 保存时会以 Manager 中的数据为准。\n */\n\nwindow.PORTFOLIO = "+JSON.stringify(data,null,2)+";\n"
+}
+async function load(){
+  try{
+    var text=await readText("content.js"); data=parseContent(text);
+    if(!Array.isArray(data.projects))data.projects=[];
+    currentIndex=Math.min(currentIndex,Math.max(0,data.projects.length-1));dirty=false;renderAll();
+    $("#saveBtn").disabled=false;$("#reloadBtn").disabled=false;$("#newProjectBtn").disabled=false;$("#previewBtn").disabled=false;
+    msg("已读取 content.js。修改后点击「保存到 content.js」。素材拖入后会复制到对应项目文件夹。","success")
+  }catch(e){msg("读取失败："+e.message+"。请确认你选择的是包含 index.html 和 content.js 的网站根目录。","error")}
+}
+function renderAll(){renderList();renderEditor()}
+function renderList(){
+  if(!data)return;projectList.innerHTML=data.projects.map(function(p,i){
+    return '<div class="project-item"><button class="project-select '+(i===currentIndex?"active":"")+'" data-index="'+i+'">'+esc(p.titleZh||p.titleEn||"未命名项目")+'<span>'+esc(p.category||"未分类")+'</span></button><div class="move-buttons"><button data-move="-1" data-index="'+i+'" title="上移">↑</button><button data-move="1" data-index="'+i+'" title="下移">↓</button></div></div>'
+  }).join("")
+}
+function val(p,k){return esc(p[k]||"")}
+function renderEditor(){
+  if(!data||!data.projects.length){$("#pageTitle").textContent="没有项目";editor.innerHTML='<div class="empty">点击左侧「新建项目」开始。</div>';return}
+  var p=data.projects[currentIndex];$("#pageTitle").textContent=p.titleZh||p.titleEn||"未命名项目";
+  var sections=Array.isArray(p.sections)?p.sections:[];
+  editor.innerHTML=
+  '<section class="card"><div class="card-head"><h3>项目基本信息</h3><small>PROJECT INFO</small></div><div class="form-grid">'+
+  field("中文标题","titleZh",p.titleZh)+field("英文标题","titleEn",p.titleEn)+field("项目 ID","id",p.id)+field("分类","category",p.category)+
+  field("年份","year",p.year)+field("角色 / 职责","role",p.role)+
+  area("项目简介","summary",p.summary)+area("英文简介","descriptionEn",p.descriptionEn)+
+  '<div class="field"><label>首页显示</label><label class="check"><input type="checkbox" data-key="visible" '+(p.visible!==false?"checked":"")+'> 显示这个项目</label></div>'+
+  '<div class="field"><label>主打项目</label><label class="check"><input type="checkbox" data-key="featured" '+(p.featured?"checked":"")+'> 首页大卡片</label></div></div></section>'+
+  '<section class="card"><div class="card-head"><h3>封面</h3><small>COVER</small></div><div class="asset-row"><span class="asset-type">IMAGE</span><div class="asset-info"><strong>'+esc(p.cover?"已设置封面":"尚未设置")+'</strong><span>'+esc(p.cover||"")+'</span></div><button class="mini" data-clear-cover>清除</button></div>'+drop("cover","选择或拖入封面图片","image/*",false)+'</section>'+
+  '<section class="card"><div class="card-head"><h3>详情页模块</h3><button class="mini" data-add-section>＋ 添加模块</button></div><div id="sections">'+sections.map(sectionMarkup).join("")+'</div></section>'+
+  '<section class="card danger-zone"><div class="card-head"><h3>项目操作</h3><small>DANGER ZONE</small></div><button class="btn btn--danger" data-delete-project>删除这个项目</button></section>'
+}
+function field(label,key,value){return '<div class="field"><label>'+label+'</label><input data-key="'+key+'" value="'+esc(value||"")+'"></div>'}
+function area(label,key,value){return '<div class="field full"><label>'+label+'</label><textarea data-key="'+key+'">'+esc(value||"")+'</textarea></div>'}
+function drop(kind,label,accept,multiple,si){return '<label class="drop" data-drop="'+kind+'" '+(si!=null?'data-section="'+si+'"':'')+'>'+label+'<input type="file" '+(accept?'accept="'+accept+'" ':'')+(multiple?"multiple ":"")+'></label>'}
+function sectionMarkup(s,i){
+  var type=s.type||"gallery", body="";
+  if(type==="gallery"){
+    var imgs=Array.isArray(s.images)?s.images:[];
+    body='<div class="field"><label>布局</label><select data-section-key="layout" data-section="'+i+'"><option value="editorial" '+(s.layout==="editorial"?"selected":"")+'>Editorial / 精选</option><option value="grid" '+(s.layout==="grid"?"selected":"")+'>Grid / 规整网格</option></select></div>'+
+    '<div class="gallery-files">'+imgs.map(function(x,j){var src=typeof x==="string"?x:x.src;return '<div class="gallery-chip"><strong>'+esc(src.split("/").pop())+'</strong><span>'+esc(src)+'</span><button class="mini" data-remove-image="'+j+'" data-section="'+i+'">移除</button></div>'}).join("")+'</div>'+
+    drop("gallery","＋ 拖入 / 选择多张图片","image/*",true,i)
+  }else{
+    body='<div class="asset-row"><span class="asset-type">'+esc(type.toUpperCase())+'</span><div class="asset-info"><strong>'+esc(s.src?s.src.split("/").pop():"尚未添加文件")+'</strong><span>'+esc(s.src||"")+'</span></div></div>'+
+    drop("single","选择 / 拖入文件",type==="video"?"video/*":type==="pdf"?"application/pdf":"",false,i)
+  }
+  return '<div class="section-box" data-section-box="'+i+'"><div class="section-top"><select data-section-type data-section="'+i+'"><option value="video" '+(type==="video"?"selected":"")+'>Video</option><option value="gallery" '+(type==="gallery"?"selected":"")+'>Gallery</option><option value="pdf" '+(type==="pdf"?"selected":"")+'>PDF</option><option value="file" '+(type==="file"?"selected":"")+'>File</option><option value="link" '+(type==="link"?"selected":"")+'>Link</option></select><input data-section-key="title" data-section="'+i+'" value="'+esc(s.title||"")+'" placeholder="模块标题"><button class="mini" data-remove-section="'+i+'">删除模块</button></div>'+body+'</div>'
+}
+function mark(){dirty=true;msg("有尚未保存的修改。点击右上角「保存到 content.js」。")}
+editor.addEventListener("input",function(e){
+  var p=data.projects[currentIndex], key=e.target.dataset.key, si=e.target.dataset.section;
+  if(key){p[key]=e.target.type==="checkbox"?e.target.checked:e.target.value;$("#pageTitle").textContent=p.titleZh||p.titleEn||"未命名项目";renderList();mark()}
+  if(si!=null&&e.target.dataset.sectionKey){p.sections[+si][e.target.dataset.sectionKey]=e.target.value;mark()}
+})
+editor.addEventListener("change",function(e){
+  if(e.target.dataset.key&&e.target.type==="checkbox"){data.projects[currentIndex][e.target.dataset.key]=e.target.checked;mark()}
+  if(e.target.matches("[data-section-type]")){
+    var i=+e.target.dataset.section, old=data.projects[currentIndex].sections[i], t=e.target.value;
+    data.projects[currentIndex].sections[i]={type:t,title:old.title||"",layout:t==="gallery"?"grid":undefined,images:t==="gallery"?[]:undefined,src:t!=="gallery"?"":undefined};
+    renderEditor();mark()
+  }
+  if(e.target.matches('.drop input'))handleFiles(e.target)
+})
+async function ensureDir(path){
+  var dir=rootHandle;for(var part of path.split("/").filter(Boolean))dir=await dir.getDirectoryHandle(part,{create:true});return dir
+}
+async function copyFile(file,dirPath,name){
+  var dir=await ensureDir(dirPath), h=await dir.getFileHandle(name,{create:true}), w=await h.createWritable();await w.write(file);await w.close()
+}
+function ext(name){var m=name.match(/(\.[^.]+)$/);return m?m[1].toLowerCase():""}
+async function handleFiles(input){
+  var files=Array.from(input.files||[]);if(!files.length)return;
+  var p=data.projects[currentIndex], folder="作品素材/"+slug(p.id||p.titleEn||p.titleZh), drop=input.closest(".drop"), kind=drop.dataset.drop, si=drop.dataset.section!=null?+drop.dataset.section:null;
+  try{
+    if(kind==="cover"){
+      var f=files[0], name="cover"+ext(f.name);await copyFile(f,folder,name);p.cover=folder+"/"+name
+    }else if(kind==="gallery"){
+      var s=p.sections[si];if(!Array.isArray(s.images))s.images=[];
+      var start=s.images.length+1;
+      for(var j=0;j<files.length;j++){var name=String(start+j).padStart(2,"0")+ext(files[j].name);await copyFile(files[j],folder,name);s.images.push(folder+"/"+name)}
+    }else{
+      var s=p.sections[si], f=files[0], base=s.type==="video"?"video":s.type==="pdf"?"document":"file", name=base+"-"+String(si+1).padStart(2,"0")+ext(f.name);
+      await copyFile(f,folder,name);s.src=folder+"/"+name
+    }
+    renderEditor();mark();msg("素材已复制到 "+folder+"。记得点击「保存到 content.js」。","success")
+  }catch(e){msg("复制素材失败："+e.message,"error")}
+}
+editor.addEventListener("click",function(e){
+  var p=data.projects[currentIndex];
+  if(e.target.matches("[data-add-section]")){if(!Array.isArray(p.sections))p.sections=[];p.sections.push({type:"gallery",title:"新模块",layout:"grid",images:[]});renderEditor();mark()}
+  if(e.target.matches("[data-remove-section]")){p.sections.splice(+e.target.dataset.removeSection,1);renderEditor();mark()}
+  if(e.target.matches("[data-remove-image]")){p.sections[+e.target.dataset.section].images.splice(+e.target.dataset.removeImage,1);renderEditor();mark()}
+  if(e.target.matches("[data-clear-cover]")){p.cover="";renderEditor();mark()}
+  if(e.target.matches("[data-delete-project]")&&confirm("确定删除「"+(p.titleZh||p.titleEn)+"」？\\n这只删除 content.js 里的项目记录，不会删除素材文件。")){data.projects.splice(currentIndex,1);currentIndex=Math.max(0,currentIndex-1);renderAll();mark()}
+})
+projectList.addEventListener("click",function(e){
+  var sel=e.target.closest("[data-index]");if(!sel)return;
+  if(e.target.dataset.move){
+    var i=+e.target.dataset.index,j=i+(+e.target.dataset.move);if(j<0||j>=data.projects.length)return;
+    var x=data.projects[i];data.projects[i]=data.projects[j];data.projects[j]=x;currentIndex=j;renderAll();mark()
+  }else{currentIndex=+sel.dataset.index;renderAll()}
+})
+$("#openFolder").addEventListener("click",async function(){
+  if(!window.showDirectoryPicker){msg("当前浏览器不支持文件夹写入。请使用桌面版 Chrome 或 Edge 打开 manager.html。","error");return}
+  try{rootHandle=await window.showDirectoryPicker({mode:"readwrite"});$("#folderLabel").textContent="已连接："+rootHandle.name;$("#folderPath").textContent="浏览器已授权读写这个文件夹";await load()}catch(e){if(e.name!=="AbortError")msg("无法打开文件夹："+e.message,"error")}
+})
+$("#reloadBtn").addEventListener("click",function(){if(dirty&&!confirm("重新读取会丢掉尚未保存的修改，继续吗？"))return;load()})
+$("#saveBtn").addEventListener("click",async function(){
+  try{await writeText("content.js",serialize());dirty=false;msg("保存成功：content.js 已更新。现在可以打开网站预览。","success")}catch(e){msg("保存失败："+e.message,"error")}
+})
+$("#newProjectBtn").addEventListener("click",function(){
+  var n=data.projects.length+1;data.projects.push({id:"new-project-"+n,visible:true,featured:false,titleZh:"新项目",titleEn:"New Project",category:"Visual Design",year:String(new Date().getFullYear()),role:"",summary:"",descriptionEn:"",cover:"",sections:[]});
+  currentIndex=data.projects.length-1;renderAll();mark()
+})
+$("#previewBtn").addEventListener("click",function(){window.open("index.html","_blank")})
+window.addEventListener("beforeunload",function(e){if(dirty){e.preventDefault();e.returnValue=""}})
+})();
+</script>
+</body>
+</html>
