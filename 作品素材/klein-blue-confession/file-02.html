@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>《克莱因蓝的自白》扩展版剧本 - 可编辑版</title>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e6e6e6;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: rgba(0, 30, 60, 0.7);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(74, 144, 226, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.1;
+            background: radial-gradient(circle at 30% 30%, #4a90e2 0%, transparent 50%),
+                        radial-gradient(circle at 70% 70%, #4a90e2 0%, transparent 50%);
+            z-index: 0;
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        h1 {
+            color: #4a90e2;
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(74, 144, 226, 0.5);
+        }
+        
+        .subtitle {
+            color: #a8d1ff;
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+        }
+        
+        .film-info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .info-item {
+            background: rgba(16, 42, 67, 0.5);
+            padding: 10px 20px;
+            border-radius: 8px;
+            border-left: 3px solid #4a90e2;
+        }
+        
+        .info-label {
+            font-size: 0.9rem;
+            color: #8fa3bf;
+        }
+        
+        .info-value {
+            font-size: 1.1rem;
+            color: #a8d1ff;
+            font-weight: 600;
+        }
+        
+        .description {
+            max-width: 900px;
+            margin: 20px auto;
+            color: #b8d4f0;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #4a90e2 0%, #2c5aa0 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(74, 144, 226, 0.6);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .btn-excel {
+            background: linear-gradient(135deg, #217346 0%, #1a5c38 100%);
+            box-shadow: 0 4px 15px rgba(33, 115, 70, 0.4);
+        }
+        
+        .btn-excel:hover {
+            box-shadow: 0 7px 20px rgba(33, 115, 70, 0.6);
+        }
+        
+        .btn-add {
+            background: linear-gradient(135deg, #e24a4a 0%, #a02c2c 100%);
+            box-shadow: 0 4px 15px rgba(226, 74, 74, 0.4);
+        }
+        
+        .btn-add:hover {
+            box-shadow: 0 7px 20px rgba(226, 74, 74, 0.6);
+        }
+        
+        .btn-save {
+            background: linear-gradient(135deg, #e2b14a 0%, #a0852c 100%);
+            box-shadow: 0 4px 15px rgba(226, 177, 74, 0.4);
+        }
+        
+        .btn-save:hover {
+            box-shadow: 0 7px 20px rgba(226, 177, 74, 0.6);
+        }
+        
+        .table-container {
+            background: rgba(10, 25, 47, 0.8);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            margin-bottom: 30px;
+            border: 1px solid rgba(74, 144, 226, 0.2);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #1a3a5f 0%, #0f2742 100%);
+            color: #a8d1ff;
+            padding: 18px 15px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+            border-bottom: 2px solid #4a90e2;
+        }
+        
+        td {
+            padding: 16px 15px;
+            border-bottom: 1px solid rgba(74, 144, 226, 0.2);
+            vertical-align: top;
+            position: relative;
+        }
+        
+        tr:nth-child(even) {
+            background: rgba(16, 42, 67, 0.4);
+        }
+        
+        tr:hover {
+            background: rgba(30, 65, 105, 0.4);
+        }
+        
+        .scene-number {
+            font-weight: bold;
+            color: #4a90e2;
+            width: 70px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+        
+        .duration {
+            color: #8fa3bf;
+            font-size: 0.9rem;
+            width: 70px;
+            text-align: center;
+        }
+        
+        .stage {
+            font-weight: bold;
+            color: #6bb1ff;
+            width: 180px;
+        }
+        
+        .visual {
+            color: #e6e6e6;
+        }
+        
+        .audio {
+            color: #b8d4f0;
+        }
+        
+        .dialogue {
+            font-style: italic;
+            color: #a8d1ff;
+        }
+        
+        .notes {
+            color: #8fa3bf;
+            font-size: 0.9rem;
+            width: 150px;
+        }
+        
+        .section-title {
+            background: rgba(22, 55, 90, 0.7);
+            padding: 15px 25px;
+            margin-top: 40px;
+            border-left: 5px solid #4a90e2;
+            font-size: 1.5rem;
+            color: #a8d1ff;
+            border-radius: 0 8px 8px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .section-duration {
+            font-size: 1rem;
+            color: #8fa3bf;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #8fa3bf;
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(74, 144, 226, 0.2);
+        }
+        
+        .style-guide {
+            background: rgba(10, 25, 47, 0.8);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            border: 1px solid rgba(74, 144, 226, 0.2);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .style-guide h3 {
+            color: #4a90e2;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(74, 144, 226, 0.3);
+            padding-bottom: 10px;
+            grid-column: 1 / -1;
+        }
+        
+        .style-guide ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .style-guide li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .style-guide li:before {
+            content: "•";
+            color: #4a90e2;
+            position: absolute;
+            left: 0;
+        }
+        
+        @media (max-width: 768px) {
+            .table-container {
+                overflow-x: auto;
+            }
+            
+            table {
+                min-width: 1000px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .film-info {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+        
+        .symbol-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .symbol-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .blue { background-color: #4a90e2; }
+        .black { background-color: #000; }
+        .white { background-color: #fff; }
+        
+        .total-duration {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.2rem;
+            color: #a8d1ff;
+        }
+        
+        .duration-bar {
+            height: 8px;
+            background: rgba(74, 144, 226, 0.2);
+            border-radius: 4px;
+            margin: 10px 0 30px;
+            overflow: hidden;
+        }
+        
+        .duration-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #4a90e2, #6bb1ff);
+            border-radius: 4px;
+            width: 100%;
+        }
+        
+        /* 可编辑样式 */
+        .editable {
+            outline: 1px dashed rgba(74, 144, 226, 0.5);
+            min-height: 20px;
+            padding: 2px 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .editable:focus {
+            outline: 2px solid #4a90e2;
+            background-color: rgba(74, 144, 226, 0.1);
+            border-radius: 4px;
+        }
+        
+        .row-controls {
+            display: flex;
+            gap: 5px;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        tr:hover .row-controls {
+            opacity: 1;
+        }
+        
+        .row-btn {
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        
+        .row-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+        
+        .row-btn-delete {
+            background: rgba(226, 74, 74, 0.7);
+        }
+        
+        .row-btn-delete:hover {
+            background: rgba(226, 74, 74, 0.9);
+        }
+        
+        .table-controls {
+            display: flex;
+            justify-content: flex-end;
+            padding: 10px 15px;
+            background: rgba(22, 55, 90, 0.3);
+            border-bottom: 1px solid rgba(74, 144, 226, 0.2);
+        }
+        
+        .table-controls .btn {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+        
+        .edit-notice {
+            background: rgba(226, 177, 74, 0.1);
+            border-left: 4px solid #e2b14a;
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+            color: #e2b14a;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-bg"></div>
+            <div class="header-content">
+                <h1>《克莱因蓝的自白》扩展版</h1>
+                <p class="subtitle">超现实主义实验短片分镜脚本 - 可编辑版</p>
+                
+                <div class="film-info">
+                    <div class="info-item">
+                        <div class="info-label">预计时长</div>
+                        <div class="info-value">4分钟</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">镜头数量</div>
+                        <div class="info-value" id="total-scenes">23个</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">制作团队</div>
+                        <div class="info-value">三人组</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">风格</div>
+                        <div class="info-value">超现实主义</div>
+                    </div>
+                </div>
+                
+                <div class="description">
+                    <p>女孩的灵魂与她创造的建筑世界一同呼吸、生长，最终在外部世界的恶意侵蚀下崩塌。她的蓝色，既是生命的色彩，也是死亡的印记。</p>
+                    <p>扩展版增加了更多细节镜头，强化情感递进和视觉冲击，使短片达到约4分钟的长度。</p>
+                </div>
+            </div>
+        </header>
+        
+        <div class="edit-notice">
+            <i class="fas fa-edit"></i> 您现在可以编辑剧本内容：点击任意单元格进行编辑，使用每行右侧的按钮删除镜头，使用每个表格下方的"添加镜头"按钮增加新镜头。
+        </div>
+        
+        <div class="controls">
+            <button class="btn" onclick="window.print()">
+                <i class="fas fa-print"></i>
+                打印剧本
+            </button>
+            <button class="btn btn-save" onclick="saveEdits()">
+                <i class="fas fa-save"></i>
+                保存编辑
+            </button>
+            <button class="btn btn-excel" onclick="exportToExcel()">
+                <i class="fas fa-file-excel"></i>
+                导出为Excel
+            </button>
+        </div>
+        
+        <div class="total-duration">
+            总时长: <strong>4分钟</strong> (240秒) | 总镜头: <strong id="total-scenes-count">23</strong>个
+        </div>
+        <div class="duration-bar">
+            <div class="duration-progress"></div>
+        </div>
+        
+        <div class="style-guide">
+            <h3>视觉风格与符号系统</h3>
+            <div>
+                <h4>色彩系统</h4>
+                <div class="symbol-item">
+                    <div class="symbol-color blue"></div>
+                    <span><strong>克莱因蓝：</strong> 生命、创造力、灵魂</span>
+                </div>
+                <div class="symbol-item">
+                    <div class="symbol-color black"></div>
+                    <span><strong>黑色：</strong> 网络暴力、毁灭性力量</span>
+                </div>
+                <div class="symbol-item">
+                    <div class="symbol-color white"></div>
+                    <span><strong>白色：</strong> 虚无、初始、纯净</span>
+                </div>
+            </div>
+            <div>
+                <h4>核心符号</h4>
+                <div class="symbol-item">
+                    <div class="symbol-color blue"></div>
+                    <span><strong>建筑蓝图：</strong> 梦想与创造</span>
+                </div>
+                <div class="symbol-item">
+                    <div class="symbol-color black"></div>
+                    <span><strong>眼睛：</strong> 审判与凝视</span>
+                </div>
+                <div class="symbol-item">
+                    <div class="symbol-color blue"></div>
+                    <span><strong>纸船：</strong> 灵魂的延续</span>
+                </div>
+            </div>
+            <div>
+                <h4>AI生成提示词</h4>
+                <ul>
+                    <li>hyperrealistic close-up of Klein blue ink</li>
+                    <li>surreal architecture growing like roots</li>
+                    <li>blue hair transforming into city streets</li>
+                    <li>black toxic ink flooding miniature city</li>
+                    <li>crumpled paper boat on dark sea</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="section-title">
+            <span>第一重呼吸：诞生 (0:00-0:45)</span>
+            <span class="section-duration">45秒 | <span class="section-scenes-count">5</span>个镜头</span>
+        </div>
+        <div class="table-container">
+            <div class="table-controls">
+                <button class="btn btn-add" onclick="addSceneToTable(this)">
+                    <i class="fas fa-plus"></i>
+                    添加镜头
+                </button>
+            </div>
+            <table id="script-table">
+                <thead>
+                    <tr>
+                        <th>镜号</th>
+                        <th>时长</th>
+                        <th>画面描述</th>
+                        <th>声音描述</th>
+                        <th>台词/独白</th>
+                        <th>备注</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="scene-number" contenteditable="true">1</td>
+                        <td class="duration" contenteditable="true">8秒</td>
+                        <td class="visual" contenteditable="true">纯黑背景。一滴浓稠、完美、如同宝石般的<strong>克莱因蓝</strong>墨水滴入画面中心。它在失重状态下悬浮、旋转，内部有星云般的光点在流动。</td>
+                        <td class="audio" contenteditable="true">空灵的心跳声，混合着铅笔在纸上划过的沙沙声。</td>
+                        <td class="dialogue" contenteditable="true">"老师说，建筑是凝固的音乐。"</td>
+                        <td class="notes" contenteditable="true">年轻，充满生命力</td>
+                    </tr>
+                    <tr>
+                        <td class="scene-number" contenteditable="true">2</td>
+                        <td class="duration" contenteditable="true">7秒</td>
+                        <td class="visual" contenteditable="true">特写：墨水内部结构，如同微观宇宙，蓝色晶体在其中形成、生长、破碎。</td>
+                        <td class="audio" contenteditable="true">心跳声加强，加入轻微水晶碰撞声。</td>
+                        <td class="dialogue" contenteditable="true">"那我的音乐，应该是什么颜色？"</td>
+                        <td class="notes" contenteditable="true">疑问的语气</td>
+                    </tr>
+                    <tr>
+                        <td class="scene-number" contenteditable="true">3</td>
+                        <td class="duration" contenteditable="true">10秒</td>
+                        <td class="visual" contenteditable="true">那滴蓝色开始拉丝、蔓延，像植物的根须，也像建筑的经纬线，在黑暗中自动勾勒出一座<strong>虚幻城市的骨架</strong>。线条全是发光的蓝色。</td>
+                        <td class="audio" contenteditable="true">心跳声加强，混合着城市远景的车流声（但经过处理，变得像风铃）。</td>
+                        <td class="dialogue" contenteditable="true">"我想……是蓝色的。"</td>
+                        <td class="notes" contenteditable="true">确定的语气</td>
+                    </tr>
+                    <tr>
+                        <td class="scene-number" contenteditable="true">4</td>
+                        <td class="duration" contenteditable="true">12秒</td>
+                        <td class="visual" contenteditable="true">蓝图逐渐细化，建筑结构变得复杂而精致，如同真实城市的微缩模型。蓝色光线在其中流动。</td>
+                        <td class="audio" contenteditable="true">加入建筑工地的声音（打桩、吊装），但被美化得像交响乐。</td>
+                        <td class="dialogue" contenteditable="true">"是天空倒置的颜色，是深海沉默的颜色……"</td>
+                        <td class="notes" contenteditable="true">诗意的描述</td>
+                    </tr>
+                    <tr>
+                        <td class="scene-number" contenteditable="true">5</td>
+                        <td class="duration" contenteditable="true">8秒</td>
+                        <td class="visual" contenteditable="true">蓝图城市完成，整体发出柔和的蓝色光芒，在黑暗中静静旋转。</td>
+                        <td class="audio" contenteditable="true">音乐达到一个小高潮，然后渐渐平静。</td>
+                        <td class="dialogue" contenteditable="true">"是灵魂燃烧时的——火焰的颜色。"</td>
+                        <td class="notes" contenteditable="true">充满激情</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="section-title">
+            <span>第二重呼吸：生长 (0:45-1:30)</span>
+            <span class="section-duration">45秒 | <span class="section-scenes-count">5</span>个镜头</span>
+        </div>
+        <div class="table-container">
+            <div class="table-controls">
+                <button class="btn btn-add" onclick="addSceneToTable(this)">
+                    <i class="fas fa-plus"></i>
+                    添加镜头
+                </button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>镜号</th>
+                        <th>时长</th>
+                        <th>画面描述</th>
+                        <th>声音描述</th>
+                        <th>台词/独白</th>
+                        <th>备注</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="scene-number" contenteditable="true">6</td>
+                        <td class="duration" contenteditable="true">10秒</td>
+                        <td class="visual" contenteditable="true"><strong>【匹配剪辑】</strong> 建筑的线条变成了小蓝的头发。她躺在广阔的草地上，蓝色的长发如河流般铺散开，与天空融为一体。</td>
+                        <td class="audio" contenteditable="true">风声，鸟鸣，女孩满足的呼吸声。</td>
+                        <td class="dialogue" contenteditable="true">"我的城市，应该是有生命的。"</td>
+                        <td class="notes" contenteditable="true">平静而自信</td>
+                    </tr>
+                    <tr>
+                        <td class="scene-number" contenteditable="true">7</td>
+                        <td class="duration" contenteditable="true">8秒</td>
+                        <td class="visual" contenteditable="true">她的设计草图从她的发梢"生长"出来，像蒲公英一样飘向天空。每一张草图都在空中展开，变成微小的建筑模型。</td>
+                        <td class="audio" contenteditable="true">纸张翻动声，轻柔的风铃声。</td>
+                        <td class="dialogue" contenteditable="true">"它会呼吸。"</td>
+                        <td class="notes" contenteditable="true">画面中，建筑的窗户随着她的呼吸同步开合</td>
+                    </tr>
+                    <tr>
+                        <td class="scene-number" contenteditable="true">8</td>
+                        <td class="duration" contenteditable="true">9秒</td>
+                        <td class="visual" contenteditable="true">超现实蒙太奇：她的眼睛特写，瞳孔里反射的不是光，而是<strong>旋转的楼梯和穹顶</strong>。</td>
+                        <td class="audio" contenteditable="true">空灵的音乐，加入建筑内部的回声效果。</td>
+                        <td class="dialogue" contenteditable="true">"我把我的梦……"</td>
+                        <td class="notes" contenteditable="true">眼神充满创造力</td>
+                    </tr>
+                    <tr>
+                        <td class="scene-number" contenteditable="true">9</td>
+                        <td class="duration" contenteditable="true">10秒</td>
+                        <td class="visual" contenteditable="true">她用画笔蘸取的不是颜料，而是从自己发梢剪下的一缕蓝色，直接画在纸上，图纸瞬间立起成为微缩模型。</td>
+                        <td class="audio" contenteditable="true">画笔划过纸张的声音，建筑成型的机械声。</td>
+                        <td class="dialogue" contenteditable="true">"……都砌进了墙里。"</td>
+                        <td class="notes" contenteditable="true">满足的语气</td>
+                    </tr>
+                    <tr>
+                        <td class="scene-number" contenteditable="true">10</td>
+                        <td class="duration" contenteditable="true">8秒</td>
+                        <td class="visual" contenteditable="true">她站在自己创造的蓝色城市中，城市随着她的心跳脉动，发出柔和的光芒。</td>
+                        <td class="audio" contenteditable="true">平稳的心跳声，城市的嗡嗡声。</td>
+                        <td class="dialogue" contenteditable="true">（微笑，无声）</td>
+                        <td class="notes" contenteditable="true">幸福的沉默</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="section-title">
+            <span>第三重呼吸：侵蚀 (1:30-2:30)</span>
+            <span class="section-duration">60秒 | <span class="section-scenes-count">5</span>个镜头</span>
+        </div>
+        <div class="table-container">
+            <div class="table-controls">
+                <button class="btn btn-add" onclick="addSceneToTable(this)">
+                    <i class="fas fa-plus"></i>
+                    添加镜头
+                </button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>镜号</th>
+                        <th>时长</th>
+                        <th>画面描述</th>
+                        <th>声音描述</th>
+                        <th>台词/独白</th>
+                        <th>备注</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="scene-number" contenteditable="true">11</td>
+                        <td class="duration" contenteditable="true">12秒</td>
+                        <td class="visual" contenteditable="true">美好的蓝色画面开始出现<strong>"信号干扰"</strong>。黑色的、扭曲的、像昆虫或污渍一样的<strong>文字弹幕</strong>开始从画面边缘侵入。</td>
+                        <td class="audio" contenteditable="true">音乐开始出现不和谐的电子噪音。出现窃窃私语声，越来越大。</td>
+                        <td class="dialogue" contenteditable="true">"……什么声音？"</td>
+                        <td class="notes" contenteditable="true">语气出现困惑</td>
+                    </tr>
+                    <tr>
+                        <td class="scene-number" contenteditable="true">12</td>
+                        <td class="duration" contenteditable="true">10秒</td>
+                        <td class="visual" contenteditable="true">弹幕内容："<strong>出位</strong>"、"<strong>炒作</strong>"、"<strong>陪来的吧？</strong>"、"<strong>真恶心</strong>"。这些文字像强酸，滴在蓝色的建筑上，留下烧灼的疤痕。</td>
+                        <td class="audio" contenteditable="true">腐蚀的嘶嘶声，文字如同苍蝇般嗡嗡作响。</td>
+                        <td class="dialogue" contenteditable="true">"关不掉……"</td>
+                        <td class="notes" contenteditable="true">焦虑加剧</td>
+                    </tr>
+                    <tr>
+                        <td class="scene-number" contenteditable="true">13</td>
+                        <td class="duration" contenteditable="true">15秒</td>
+                        <td class="visual" contenteditable="true">小蓝在她的蓝图城市中奔跑，但街道开始扭曲，墙壁上爬满了那些黑色的文字。她试图用手去擦掉，文字却像藤蔓一样缠上她的手臂。</td>
+                        <td class="audio" contenteditable="true">窃窃私语变成清晰的、充满恶意的指责声，来自四面八方。加入急促的呼吸声和脚步声。</td>
+                        <td class="dialogue" contenteditable="true">"它们……在拆我的房子。"</td>
+                        <td class="notes" contenteditable="true">带着喘息，恐慌</td>
+                    </tr>
+                    <tr>
+                        <td class="scene-number" contenteditable="true">14</td>
+                        <td class="duration" contenteditable="true">13秒</td>
+                        <td class="visual" contenteditable="true">黑色文字开始聚合，形成巨大的人形阴影，在城市中投下长长的影子，笼罩一切。</td>
+                        <td class="audio" contenteditable="true">阴影移动的低沉轰鸣声，混合着无数人同时低语的效果。</td>
+                        <td class="dialogue" contenteditable="true">"为什么……为什么……"</td>
+                        <td class="notes" contenteditable="true">绝望的重复</td>
+                    </tr>
+                    <tr>
+                        <td class="scene-number" contenteditable="true">15</td>
+                        <td class="duration" contenteditable="true">10秒</td>
+                        <td class="visual" contenteditable="true">她蜷缩在角落，蓝色头发开始失去光泽，建筑上的蓝色也在逐渐褪去。</td>
+                        <td class="audio" contenteditable="true">声音逐渐模糊，如同水下听到的效果。</td>
+                        <td class="dialogue" contenteditable="true">（无声哭泣）</td>
+                        <td class="notes" contenteditable="true">情感低谷</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="section-title">
+            <span>第四重呼吸：崩塌 (2:30-3:30)</span>
+            <span class="section-duration">60秒 | <span class="section-scenes-count">5</span>个镜头</span>
+        </div>
+        <div class="table-container">
+            <div class="table-controls">
+                <button class="btn btn-add" onclick="addSceneToTable(this)">
+                    <i class="fas fa-plus"></i>
+                    添加镜头
+                </button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>镜号</th>
+                        <th>时长</th>
+                        <th>画面描述</th>
+                        <th>声音描述</th>
+                        <th>台词/独白</th>
+                        <th>备注</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="scene-number" contenteditable="true">16</td>
+                        <td class="duration" contenteditable="true">12秒</td>
+                        <td class="visual" contenteditable="true"><strong>【视觉高潮】</strong> 小蓝站在她创造的蓝色城市中心。无数只<strong>巨大的、没有面孔的眼睛</strong>在城市的天空和墙壁上睁开，死死地盯着她。</td>
+                        <td class="audio" contenteditable="true">所有声音瞬间静止，只剩下放大的心跳声。</td>
+                        <td class="dialogue" contenteditable="true">"……"</td>
+                        <td class="notes" contenteditable="true">颤抖，恐惧，无法言语</td>
+                    </tr>
+                    <tr>
+                        <td class="scene-number" contenteditable="true">17</td>
+                        <td class="duration" contenteditable="true">15秒</td>
+                        <td class="visual" contenteditable="true">那些眼睛开始流泪，流下的不是眼泪，而是<strong>粘稠的、黑色的墨水</strong>。墨水如洪水般淹没蓝色的街道，腐蚀建筑，将她精致的蓝图冲毁、覆盖。</td>
+                        <td class="audio" contenteditable="true">巨大的、玻璃碎裂和建筑倒塌的轰鸣声，但被拉长、扭曲，如同噩梦。加入洪水奔涌的声音。</td>
+                        <td class="dialogue" contenteditable="true">"——！"</td>
+                        <td class="notes" contenteditable="true">尖叫，但被声音淹没</td>
+                    </tr>
+                    <tr>
+                        <td class="scene-number" contenteditable="true">18</td>
+                        <td class="duration" contenteditable="true">13秒</td>
+                        <td class="visual" contenteditable="true">小蓝的蓝色头发在墨水中迅速被染黑、褪色。她本人也像一尊沙雕，在黑色的洪流中逐渐溶解、崩塌。</td>
+                        <td class="audio" contenteditable="true">溶解的声音，混合着绝望的呜咽。</td>
+                        <td class="dialogue" contenteditable="true">"我的蓝色……"</td>
+                        <td class="notes" contenteditable="true">微弱，几乎听不见</td>
+                    </tr>
+                    <tr>
+                        <td class="scene-number" contenteditable="true">19</td>
+                        <td class="duration" contenteditable="true">10秒</td>
+                        <td class="visual" contenteditable="true">最后，画面中心只剩下一缕仍在顽强闪烁的、微弱的蓝色发丝，在黑色洪流中漂浮。</td>
+                        <td class="audio" contenteditable="true">一切声音逐渐消失，只剩下微弱的、类似电视雪花的噪音。</td>
+                        <td class="dialogue" contenteditable="true">"……不见了……"</td>
+                        <td class="notes" contenteditable="true">如同呓语</td>
+                    </tr>
+                    <tr>
+                        <td class="scene-number" contenteditable="true">20</td>
+                        <td class="duration" contenteditable="true">10秒</td>
+                        <td class="visual" contenteditable="true">黑色墨水淹没一切，画面变成一片漆黑，只有那缕蓝色发丝如最后星辰般闪烁了三下，然后彻底熄灭。</td>
+                        <td class="audio" contenteditable="true">绝对的寂静，持续3秒。</td>
+                        <td class="dialogue" contenteditable="true">（无声）</td>
+                        <td class="notes" contenteditable="true">情感上的完全崩塌</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="section-title">
+            <span>第五重呼吸：回响 (3:30-4:00)</span>
+            <span class="section-duration">30秒 | <span class="section-scenes-count">3</span>个镜头</span>
+        </div>
+        <div class="table-container">
+            <div class="table-controls">
+                <button class="btn btn-add" onclick="addSceneToTable(this)">
+                    <i class="fas fa-plus"></i>
+                    添加镜头
+                </button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>镜号</th>
+                        <th>时长</th>
+                        <th>画面描述</th>
+                        <th>声音描述</th>
+                        <th>台词/独白</th>
+                        <th>备注</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="scene-number" contenteditable="true">21</td>
+                        <td class="duration" contenteditable="true">10秒</td>
+                        <td class="visual" contenteditable="true">黑色褪去，画面回到纯白。那缕微弱的蓝色发丝，变成了一支<strong>折断的、沾着蓝色颜料的画笔</strong>，静静地躺在一张被揉皱的、空白的图纸上。</td>
+                        <td class="audio" contenteditable="true">极远处，传来海浪的声音（呼应主片中"去看海"的便签）。</td>
+                        <td class="dialogue" contenteditable="true">"我想……去看海。"</td>
+                        <td class="notes" contenteditable="true">不再是她的声音，而是她写在便签上的话，由空灵的女声念出</td>
+                    </tr>
+                    <tr>
+                        <td class="scene-number" contenteditable="true">22</td>
+                        <td class="duration" contenteditable="true">12秒</td>
+                        <td class="visual" contenteditable="true">镜头拉远，那张被揉皱的图纸，被小心地抚平，折叠成了一只<strong>小小的、蓝色的纸船</strong>。</td>
+                        <td class="audio" contenteditable="true">海浪声渐强，混合着轻柔的、希望的音乐。</td>
+                        <td class="dialogue" contenteditable="true"></td>
+                        <td class="notes" contenteditable="true">象征灵魂的解脱</td>
+                    </tr>
+                    <tr>
+                        <td class="scene-number" contenteditable="true">23</td>
+                        <td class="duration" contenteditable="true">8秒</td>
+                        <td class="visual" contenteditable="true">纸船被放入水中，漂向黑暗的远方，直至变成唯一的光点，最终消失在海平面。</td>
+                        <td class="audio" contenteditable="true">海浪声达到高潮，然后渐渐平息。</td>
+                        <td class="dialogue" contenteditable="true"></td>
+                        <td class="notes" contenteditable="true">屏幕文字：我的城市沉没了，但海洋会是它最终的蓝图。</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="controls">
+            <button class="btn" onclick="window.print()">
+                <i class="fas fa-print"></i>
+                打印剧本
+            </button>
+            <button class="btn btn-save" onclick="saveEdits()">
+                <i class="fas fa-save"></i>
+                保存编辑
+            </button>
+            <button class="btn btn-excel" onclick="exportToExcel()">
+                <i class="fas fa-file-excel"></i>
+                导出为Excel
+            </button>
+        </div>
+        
+        <footer>
+            <p>《克莱因蓝的自白》扩展版剧本 &copy; 2023 - 超现实主义实验短片 | 三人组制作</p>
+            <p>色彩统治：全片严格控制在克莱因蓝、纯黑、纯白三色 | 总镜头: <span id="footer-scenes-count">23</span>个 | 总时长: 4分钟</p>
+        </footer>
+    </div>
+
+    <script>
+        // 初始化页面，为所有行添加控制按钮
+        document.addEventListener('DOMContentLoaded', function() {
+            addRowControls();
+            updateSceneCounts();
+        });
+        
+        // 为所有行添加控制按钮
+        function addRowControls() {
+            const tables = document.querySelectorAll('table');
+            
+            tables.forEach(table => {
+                const rows = table.querySelectorAll('tbody tr');
+                
+                rows.forEach(row => {
+                    // 检查是否已经有控制按钮
+                    if (!row.querySelector('.row-controls')) {
+                        const controlsDiv = document.createElement('div');
+                        controlsDiv.className = 'row-controls';
+                        
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.className = 'row-btn row-btn-delete';
+                        deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                        deleteBtn.title = '删除此镜头';
+                        deleteBtn.onclick = function() {
+                            if (confirm('确定要删除这个镜头吗？')) {
+                                row.remove();
+                                updateSceneCounts();
+                                renumberScenes();
+                            }
+                        };
+                        
+                        controlsDiv.appendChild(deleteBtn);
+                        
+                        // 创建容器来放置控制按钮
+                        const controlsContainer = document.createElement('td');
+                        controlsContainer.style.position = 'relative';
+                        controlsContainer.style.width = '40px';
+                        
+                        // 将控制按钮添加到最后一列
+                        const lastCell = row.querySelector('td:last-child');
+                        lastCell.appendChild(controlsDiv);
+                    }
+                });
+            });
+        }
+        
+        // 添加新镜头到表格
+        function addSceneToTable(button) {
+            const tableContainer = button.closest('.table-container');
+            const table = tableContainer.querySelector('table');
+            const tbody = table.querySelector('tbody');
+            
+            // 创建新行
+            const newRow = document.createElement('tr');
+            
+            // 获取当前表格中的最大镜号
+            let maxSceneNum = 0;
+            const sceneCells = tbody.querySelectorAll('.scene-number');
+            sceneCells.forEach(cell => {
+                const sceneNum = parseInt(cell.textContent) || 0;
+                if (sceneNum > maxSceneNum) maxSceneNum = sceneNum;
+            });
+            
+            // 计算新镜号
+            const newSceneNum = maxSceneNum + 1;
+            
+            // 创建单元格
+            const cells = [
+                {className: 'scene-number', content: newSceneNum.toString()},
+                {className: 'duration', content: '5秒'},
+                {className: 'visual', content: '新镜头的画面描述...'},
+                {className: 'audio', content: '新镜头的声音描述...'},
+                {className: 'dialogue', content: '新镜头的台词...'},
+                {className: 'notes', content: '新镜头的备注...'}
+            ];
+            
+            cells.forEach(cellData => {
+                const cell = document.createElement('td');
+                cell.className = cellData.className;
+                cell.contentEditable = true;
+                cell.textContent = cellData.content;
+                
+                // 为特定单元格添加特殊处理
+                if (cellData.className === 'scene-number') {
+                    cell.style.fontWeight = 'bold';
+                    cell.style.color = '#4a90e2';
+                    cell.style.textAlign = 'center';
+                }
+                
+                if (cellData.className === 'duration') {
+                    cell.style.textAlign = 'center';
+                }
+                
+                newRow.appendChild(cell);
+            });
+            
+            // 添加到表格
+            tbody.appendChild(newRow);
+            
+            // 为新行添加控制按钮
+            addRowControls();
+            
+            // 更新场景计数
+            updateSceneCounts();
+            
+            // 自动聚焦到新行的第一个单元格
+            setTimeout(() => {
+                newRow.querySelector('.scene-number').focus();
+            }, 100);
+        }
+        
+        // 更新场景计数
+        function updateSceneCounts() {
+            // 计算总镜头数
+            let totalScenes = 0;
+            const sectionCounts = [];
+            
+            // 更新每个部分的镜头计数
+            document.querySelectorAll('.table-container').forEach((container, index) => {
+                const table = container.querySelector('table');
+                const sceneCount = table.querySelectorAll('tbody tr').length;
+                totalScenes += sceneCount;
+                sectionCounts.push(sceneCount);
+                
+                // 更新部分标题中的镜头计数
+                const sectionTitle = container.previousElementSibling;
+                if (sectionTitle && sectionTitle.classList.contains('section-title')) {
+                    const sceneCountSpan = sectionTitle.querySelector('.section-scenes-count');
+                    if (sceneCountSpan) {
+                        sceneCountSpan.textContent = sceneCount;
+                    }
+                }
+            });
+            
+            // 更新总镜头计数
+            document.getElementById('total-scenes-count').textContent = totalScenes;
+            document.getElementById('footer-scenes-count').textContent = totalScenes;
+            
+            // 更新标题中的镜头计数
+            const totalScenesElement = document.getElementById('total-scenes');
+            if (totalScenesElement) {
+                totalScenesElement.textContent = totalScenes + '个';
+            }
+            
+            // 重新编号所有场景
+            renumberScenes();
+        }
+        
+        // 重新编号所有场景
+        function renumberScenes() {
+            let sceneCounter = 1;
+            
+            document.querySelectorAll('.table-container').forEach(container => {
+                const table = container.querySelector('table');
+                const rows = table.querySelectorAll('tbody tr');
+                
+                rows.forEach(row => {
+                    const sceneCell = row.querySelector('.scene-number');
+                    if (sceneCell) {
+                        sceneCell.textContent = sceneCounter.toString();
+                        sceneCounter++;
+                    }
+                });
+            });
+        }
+        
+        // 保存编辑
+        function saveEdits() {
+            // 这里可以添加将编辑保存到本地存储或服务器的代码
+            // 目前我们只是显示一个保存成功的消息
+            alert('编辑已保存！您可以使用"导出为Excel"按钮将修改后的剧本导出。');
+            
+            // 在实际应用中，您可以将数据保存到localStorage
+            // saveToLocalStorage();
+        }
+        
+        // 导出为Excel
+        function exportToExcel() {
+            // 由于有多个表格，我们需要合并它们
+            const tables = document.querySelectorAll('table');
+            const wb = XLSX.utils.book_new();
+            
+            // 创建一个新的工作表，包含所有表格的数据
+            let allData = [];
+            
+            // 添加表头
+            const headers = ['镜号', '时长', '画面描述', '声音描述', '台词/独白', '备注'];
+            allData.push(headers);
+            
+            // 遍历所有表格，提取数据
+            tables.forEach(table => {
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td:not(:last-child)'); // 排除控制按钮列
+                    const rowData = [];
+                    cells.forEach(cell => {
+                        rowData.push(cell.textContent.trim());
+                    });
+                    allData.push(rowData);
+                });
+            });
+            
+            // 创建工作表
+            const ws = XLSX.utils.aoa_to_sheet(allData);
+            
+            // 设置列宽
+            const colWidths = [
+                {wch: 6},  // 镜号
+                {wch: 8},  // 时长
+                {wch: 50}, // 画面描述
+                {wch: 30}, // 声音描述
+                {wch: 25}, // 台词/独白
+                {wch: 15}  // 备注
+            ];
+            ws['!cols'] = colWidths;
+            
+            // 将工作表添加到工作簿
+            XLSX.utils.book_append_sheet(wb, ws, "克莱因蓝的自白剧本");
+            
+            // 生成Excel文件并下载
+            XLSX.writeFile(wb, "克莱因蓝的自白-扩展版剧本.xlsx");
+        }
+        
+        // 将数据保存到本地存储
+        function saveToLocalStorage() {
+            const tables = document.querySelectorAll('table');
+            const allData = [];
+            
+            tables.forEach(table => {
+                const rows = table.querySelectorAll('tbody tr');
+                const tableData = [];
+                
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td:not(:last-child)');
+                    const rowData = [];
+                    cells.forEach(cell => {
+                        rowData.push(cell.textContent.trim());
+                    });
+                    tableData.push(rowData);
+                });
+                
+                allData.push(tableData);
+            });
+            
+            localStorage.setItem('kleinBlueScript', JSON.stringify(allData));
+            console.log('数据已保存到本地存储');
+        }
+        
+        // 从本地存储加载数据
+        function loadFromLocalStorage() {
+            const savedData = localStorage.getItem('kleinBlueScript');
+            if (savedData) {
+                const allData = JSON.parse(savedData);
+                
+                const tables = document.querySelectorAll('table');
+                
+                tables.forEach((table, tableIndex) => {
+                    const tbody = table.querySelector('tbody');
+                    const rows = tbody.querySelectorAll('tr');
+                    
+                    if (allData[tableIndex]) {
+                        allData[tableIndex].forEach((rowData, rowIndex) => {
+                            if (rows[rowIndex]) {
+                                const cells = rows[rowIndex].querySelectorAll('td:not(:last-child)');
+                                cells.forEach((cell, cellIndex) => {
+                                    if (rowData[cellIndex]) {
+                                        cell.textContent = rowData[cellIndex];
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+                
+                updateSceneCounts();
+                console.log('数据已从本地存储加载');
+            }
+        }
+        
+        // 页面加载时尝试从本地存储加载数据
+        document.addEventListener('DOMContentLoaded', function() {
+            // 注释掉下面的行，如果您不想自动加载保存的数据
+            // loadFromLocalStorage();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+/* Internal 4:3 project cover canvas; no grid, typography or other section rules. */
+.cover-canvas{position:relative;overflow:hidden;aspect-ratio:4/3;background:#ecece7}
+.cover-canvas>[data-cover-media],#work .project-card__visual.cover-canvas>[data-cover-media]{display:block;width:100%;height:100%;max-height:none;transform:scale(var(--cover-scale,1));transition:transform .45s cubic-bezier(.2,.7,.2,1)}
+.cover-canvas>[data-cover-media][hidden]{display:none!important}
+@media(hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){#work .project-card:hover .cover-canvas>[data-cover-media]{transform:scale(calc(var(--cover-scale,1)*1.015))}}
+@media(prefers-reduced-motion:reduce){.cover-canvas>[data-cover-media],#work .project-card__visual.cover-canvas>[data-cover-media]{transition:none!important;transform:scale(var(--cover-scale,1))!important}}
+#work .cover-canvas>video[data-cover-media]{pointer-events:none}
